@@ -1,0 +1,37 @@
+version: '3'
+services:
+  postgres:
+    image: postgres:14.1
+    container_name: ${DBSERVERNAME}
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-q", "-d", "postgres", "-U", "root" ]
+      timeout: 45s
+      interval: 10s
+      retries: 10
+    restart: always
+    environment:
+      - POSTGRES_USER=${DBUSER}
+      - POSTGRES_PASSWORD=${DBPASS}
+      - APP_DB_USER=docker
+      - APP_DB_PASS=docker
+      - APP_DB_NAME=${DBNAME}
+    volumes:
+      - ./db:/docker-entrypoint-initdb.d/
+    ports:
+      - ${DBPORT}:5432
+
+  redis:
+    image: redis:6.2-alpine
+    restart: always
+    ports:
+      - "16379:6379"
+    command: redis-server --requirepass "mypass"
+
+#  graphqlserver:
+#    container_name: graphqlserver
+#    build:
+#      context: .
+#      dockerfile: Dockerfile
+#    ports:
+#      - ${EXTERNALBACKEND}:${INTERNALBACKEND}
+
